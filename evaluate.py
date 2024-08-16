@@ -1,9 +1,81 @@
 import os
-
 import numpy as np
 import pandas as pd
 
 
+# Modularity
+def modularity(index):
+    cmu = nodes_per_cmu[index]
+    lc = 0
+    dc = 0
+    for n in cmu:
+        # lc += len(adj[n])
+        if not adj.get(n):
+            continue
+        dc += len(adj[n])
+        for m in adj[n]:
+            # if m in cmu:
+            if table[int(m)]:
+                lc += 1
+    lc /= 2
+    # print(lc)
+    return lc / E - dc * dc / (4 * E * E)
+
+def vertex_density(index):
+    cmu = nodes_per_cmu[index]
+    ec = 0
+    vc = len(cmu)
+    for n in cmu:
+        if not adj.get(n):
+            continue
+        # lc += len(adj[n])
+        for m in adj[n]:
+            # if m in cmu:
+            if table[int(m)]:
+                ec += 1
+    ec /= 2
+
+    return ec / vc
+
+def edge_density(index):
+    cmu = nodes_per_cmu[index]
+    ec = 0
+    vc = len(cmu)
+    for n in cmu:
+        if not adj.get(n):
+            continue
+        # lc += len(adj[n])
+        for m in adj[n]:
+            # if m in cmu:
+            if table[int(m)]:
+                ec += 1
+    ec /= 2
+
+    if vc - 1 <= 0:
+        return -1
+    return 2 * ec / (vc * (vc - 1))
+
+def inverse_conductance(index):
+    cmu = nodes_per_cmu[index]
+    tc = 0
+    lc = 0
+    dc = 0
+    for n in cmu:
+        if not adj.get(n):
+            continue
+        tc += len(adj[n])
+        dc += len(adj[n])
+        for m in adj[n]:
+            # if m in cmu:
+            if table[int(m)]:
+                lc += 1
+    c_ = (tc - lc) / 2
+
+    return 1 - c_ / dc
+
+def size(index):
+    return len(nodes_per_cmu[index])
+        
 # 计算 'modularity', 'vertex_density', 'edge_density', 'inverse_conductance', 'siz
 def run_undirected(name):
     # with open('{}.query'.format(name), 'r') as fr:
@@ -51,78 +123,7 @@ def run_undirected(name):
                 adj[line[0]].add(line[1])
     E /= 2  # 无向图总边长 / 2
 
-    # Modularity
-    def modularity(index):
-        cmu = nodes_per_cmu[index]
-        lc = 0
-        dc = 0
-        for n in cmu:
-            # lc += len(adj[n])
-            if not adj.get(n):
-                continue
-            dc += len(adj[n])
-            for m in adj[n]:
-                # if m in cmu:
-                if table[int(m)]:
-                    lc += 1
-        lc /= 2
-        # print(lc)
-        return lc / E - dc * dc / (4 * E * E)
 
-    def vertex_density(index):
-        cmu = nodes_per_cmu[index]
-        ec = 0
-        vc = len(cmu)
-        for n in cmu:
-            if not adj.get(n):
-                continue
-            # lc += len(adj[n])
-            for m in adj[n]:
-                # if m in cmu:
-                if table[int(m)]:
-                    ec += 1
-        ec /= 2
-
-        return ec / vc
-
-    def edge_density(index):
-        cmu = nodes_per_cmu[index]
-        ec = 0
-        vc = len(cmu)
-        for n in cmu:
-            if not adj.get(n):
-                continue
-            # lc += len(adj[n])
-            for m in adj[n]:
-                # if m in cmu:
-                if table[int(m)]:
-                    ec += 1
-        ec /= 2
-
-        if vc - 1 <= 0:
-            return -1
-        return 2 * ec / (vc * (vc - 1))
-
-    def inverse_conductance(index):
-        cmu = nodes_per_cmu[index]
-        tc = 0
-        lc = 0
-        dc = 0
-        for n in cmu:
-            if not adj.get(n):
-                continue
-            tc += len(adj[n])
-            dc += len(adj[n])
-            for m in adj[n]:
-                # if m in cmu:
-                if table[int(m)]:
-                    lc += 1
-        c_ = (tc - lc) / 2
-
-        return 1 - c_ / dc
-
-    def size(index):
-        return len(nodes_per_cmu[index])
 
     data_reserved = np.zeros((len(nodes_per_cmu) + 1, 5))
     index_labels = []
